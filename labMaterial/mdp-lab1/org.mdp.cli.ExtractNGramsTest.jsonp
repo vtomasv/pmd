@@ -1,0 +1,13 @@
+receiveJsonpData({
+"cols": [
+{"label": "Run", "type": "string"},
+{"label": "Custom key", "type": "string"},
+{"label": "Timestamp", "type": "string"},
+{"label": "extractNGrams_2", "type": "string"} ,
+{"label": "extractNGrams_3", "type": "string"} ,
+{"label": "extractNGrams_4", "type": "string"} ],
+"rows": [
+{"c": [{"v": "1"}, {"v": "[1]"}, {"v": "2016-03-11 14:01:06.717"}, {"v": 65.091}, {"v": 89.552}, {"v": 102.801}]},
+{"c": [{"v": "2"}, {"v": "[2]"}, {"v": "2016-03-11 14:32:40.362"}, {"v": 65.404}, {"v": 89.778}, {"v": 103.211}]},
+{"c": [{"v": "3"}, {"v": "[3]"}, {"v": "2016-03-11 14:43:25.768"}, {"v": 65.523}, {"v": 89.948}, {"v": 103.604}]}
+]});

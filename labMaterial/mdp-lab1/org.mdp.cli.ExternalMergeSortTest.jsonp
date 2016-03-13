@@ -1,0 +1,14 @@
+receiveJsonpData({
+"cols": [
+{"label": "Run", "type": "string"},
+{"label": "Custom key", "type": "string"},
+{"label": "Timestamp", "type": "string"},
+{"label": "externalMergeSort_2", "type": "string"} ,
+{"label": "externalMergeSort_3", "type": "string"} ,
+{"label": "externalMergeSort_4", "type": "string"} ],
+"rows": [
+{"c": [{"v": "4"}, {"v": "[4]"}, {"v": "2016-03-11 15:02:28.357"}, {"v": 122.159}, {"v": null}, {"v": null}]},
+{"c": [{"v": "5"}, {"v": "[5]"}, {"v": "2016-03-11 16:15:20.819"}, {"v": 122.914}, {"v": 155.113}, {"v": 178.187}]},
+{"c": [{"v": "6"}, {"v": "[6]"}, {"v": "2016-03-11 19:52:42.437"}, {"v": 11423.466}, {"v": 929.369}, {"v": 1201.055}]},
+{"c": [{"v": "7"}, {"v": "[7]"}, {"v": "2016-03-12 14:13:28.721"}, {"v": null}, {"v": 2534.554}, {"v": 2513.468}]}
+]});

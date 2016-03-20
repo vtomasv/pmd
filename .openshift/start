@@ -1,0 +1,11 @@
+#!/bin/bash
+# The logic to start up your application should be put in this
+# script. The application will work only if it binds to
+# $OPENSHIFT_INTERNAL_IP:8080
+
+cd $OPENSHIFT_REPO_DIR
+
+if [[ -z "$OPENSHIFT_INTERNAL_IP" ]]; then export OPENSHIFT_INTERNAL_IP="$OPENSHIFT_DIY_IP"; fi
+if [[ -z "$OPENSHIFT_INTERNAL_PORT" ]]; then export OPENSHIFT_INTERNAL_PORT="$OPENSHIFT_DIY_PORT"; fi
+
+nohup java -classpath .\** -jar ./labMaterial/mdp-lab2/dist/rmi.jar StartRegistryAndServer -r -s 1 -p 8080 > ${OPENSHIFT_DIY_LOG_DIR}/MyHttpServer.log 2>&1 &

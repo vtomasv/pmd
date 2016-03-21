@@ -63,4 +63,40 @@ Ahora veamos como queda el escenario con este nuevo componente.
 <img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/diagrama_2.png"  width="60%" height="60%">
 </p>
 
+## Manos a la obra 
 
+Ahora una vez con estos conceptos podemos empezar a codificar. 
+Vamos a crear un chat, en realidad un chat muy básico, la idea es que vamos a tener un servidor central donde los usuarios se registran, luego una vez registrados pueden hablar entre ellos de forma directa. 
+Primero debe estar arriba el servidor central, este servidor central es el que permite que los usuario puedan hablarse entre si, por lo tanto un usuario para poder hablar con otro lo primero que hace es buscar el objeto en el servidor de usuarios que le permite registrarse (remotamente), luego con ese objeto se registra en el servidor central, una vez registrado puede buscar a otros usuarios. Particularmente si este usuario que se acaba de registrar quiere hablarle a otro lo que debe hacer es pedirle al servidor central que le muestre donde se encuentra el otro usuario, ya que cada usuario le va hablar al otro el forma directa, es por eso que el servidor central nos entrega los datos de donde se encuentra el registro del usuario con el que queremos hablar y nos conectamos con el para invocar los métodos remotos de ese usuario y así simular el chat. 
+
+### Arquitectura inicial 
+ 
+ Simulamos que existe un directorio de usuarios y dos usuarios que quieren hablar entre si. 
+  
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/interaccion.001.png"  >
+</p>
+
+### Creando usuarios  
+
+Cada uno de los clientes repite este paso, se conecta al repositorio del directorio de usuarios y se agrega al directorio. 
+
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/interaccion.002.png"  >
+</p>
+
+### Ahora uno de los clientes decide hablarle al otro
+
+En este paso ya los dos usuarios creados, tienen la capacidad de listar que usuarios están conectados, el usuario (cliente 1) decide hablarle a otro usuario (cliente 2) por lo que lo busca en el directorio y se conecta al repositorio del otro usuario (con el que desea hablar)  
+
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/interaccion.003.png"  >
+</p>
+
+### A conversar! 
+
+Una vez obtiene el objeto remoto ***InstantMessagingStub*** puede invocar el método *message(User, msg)* y con eso comienza la diversion! 
+
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/interaccion.004.png"  >
+</p>

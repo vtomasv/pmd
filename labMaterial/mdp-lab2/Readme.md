@@ -11,8 +11,8 @@ El ejercicio puede ser un poco confuso por los nombres de las clases por pero in
 
 Lo primero que vamos a hacer es poder entender el concepto de ejecución remota, pensemos en el siguiente escenario. Tengo un computador y un celular y quiero que cuando pulse un botón en el celular el computador inicie una actividad, ósea se ejecute algo en el computador y devuelva la respuesta. Todo esto pensando que claramente lo ejecuto en el computador porque el celular no tiene capacidad (memoria, disco, red, etc.) para poder realizarlo por si solo.
 
-![Diagrama 1](https://raw.githubusercontent.com/vtomasv/pmd/master/assets/diagrama_1.png)
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/diagrama_1.png"  width="60%" height="60%">
+</p>
 
-
-
-	
+eee ddd

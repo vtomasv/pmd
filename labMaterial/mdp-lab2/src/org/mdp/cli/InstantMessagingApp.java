@@ -14,6 +14,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -32,6 +33,9 @@ import org.mdp.im.InstantMessagingStub;
 
 public class InstantMessagingApp {
 
+	
+	static private Map<String,InstantMessagingStub> directoryOfRepositorys = new ConcurrentHashMap<String,InstantMessagingStub>();
+	
 	static String LOGO = 
 			"========================================\n"+
 					" _ __ ___   ___ _ __  ___  __ _ (_) ___\n"+ 
@@ -99,7 +103,7 @@ public class InstantMessagingApp {
 		}
 
 		// set hostname ... if null, same as localhost
-		String dir_hostname = null;
+		String dir_hostname = "localhostt";
 		if (cmd.hasOption("n")) {
 			dir_hostname = cmd.getOptionValue("n");
 		}
@@ -264,16 +268,16 @@ public class InstantMessagingApp {
 	 * @throws AlreadyBoundException
 	 */
 	public static Remote bindSkeleton(Registry r) throws RemoteException, AlreadyBoundException {
-		// create a skeleton/stub for the instant messaging server
+		
+		// Ahora lo que hacemos es registrar nuestro servidor de mensajeria local
+		// en nuestro repositorio para que otro cliente que quiera hablar con nosotros
+		// use este objeto de forma remota. 
 		Remote skel = new InstantMessagingServer();
 		
-		// TODO export the skel object, and bind the object in the regsitry under the name
-		// given by InstantMessagingServer.DEFAULT_REG_NAME (you and the client
-		// will need to agree on this so we will all use the same name!)
+		InstantMessagingStub stub = (InstantMessagingStub) UnicastRemoteObject.exportObject(skel, 0);
+		
+		r.bind(InstantMessagingServer.DEFAULT_REG_NAME, stub);
 
-
-
-		// return the skeleton
 		return skel;
 	}
 
@@ -291,16 +295,30 @@ public class InstantMessagingApp {
 	 * @throws AccessException 
 	 */
 	public static long messageUser(User to, User from, String msg) throws AccessException, RemoteException, NotBoundException{
-		// TODO First we need to connect to the remote registry 
-		// on the IP and port given by the user details we got
-		// from the directory
 
-		// TODO then need to find the interface we're looking for
-		// from the registry using the same name: InstantMessagingServer.DEFAULT_REG_NAME
+		InstantMessagingStub server  = InstantMessagingApp.directoryOfRepositorys.get(to.getUsername());
+		
+		
+		if ( server == null )
+		{ 		
+			// Lo primero que hacemos es conectarnos al repositorio del usuario que queremos 
+			// hablarle 
+			Registry registry = LocateRegistry.getRegistry(to.getHostname(), to.getPort());
 
-		// TODO replace the following to return the time the message
-		// was received by the user
-		return 0;
+			// Una vez  nos conectamos traemos el objeto remoto que representa a su servidor 
+			// de mensajeria para poder invocarle metodos remotamente. 
+			
+			server = (InstantMessagingStub) registry.lookup(InstantMessagingServer.DEFAULT_REG_NAME);
+
+			InstantMessagingApp.directoryOfRepositorys.put(to.getUsername(), server);
+		}
+		
+
+		// Una vez que tenemos el objeto remoto podemos invocar 
+		// metodos sin problemas!! 
+		long dateInLong  = server.message(from, msg);
+		
+		return dateInLong;
 	}
 
 	/**
@@ -316,15 +334,17 @@ public class InstantMessagingApp {
 	 * @throws NotBoundException 
 	 */
 	public static UserDirectoryStub connectToDirectory(String hostname, int port) throws RemoteException, NotBoundException {
-		// TODO First we need to connect to the remote registry 
-		// on the IP and port of the central directory, much
-		// like in message user
-		
 
-		// TODO then need to find the interface we're looking for 
-		// and return it. Make sure to replace the null in the
-		// return statement
-		return null;
+		// Lo primero que hacemos es conectarnos al Registro del servidor
+		// que contiene a todos los usuarios
+		Registry registry = LocateRegistry.getRegistry(UserDirectoryClientApp.DIR_HOSTNAME, UserDirectoryClientApp.DIR_PORT);
+		
+		// Lo siguiente es obtener el objeto remoto del directorio asi a ese objeto
+		// le podemos pedir quien esta conectado! 
+		UserDirectoryStub stub = (UserDirectoryStub) registry.lookup(UserDirectoryServer.class.getSimpleName());
+		
+		
+		return stub;
 	}
 
 	public static void printHelp(Options options){

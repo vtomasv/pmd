@@ -14,9 +14,15 @@ public class InstantMessagingServer implements InstantMessagingStub {
 	private static final long serialVersionUID = -6682365848634470441L;
 
 	public long message(User from, String msg) throws RemoteException {
-		//TODO print the message, who is was from, etc.
+
+		String leftAlignFormat = "| %-40s | %-10s |%n";
+
+		System.out.format("+------------------------------------------+------------+%n");
+		System.out.format("|              Mensaje                     |   Usuario  |%n");
+		System.out.format("+------------------------------------------+------------+%n");
+		System.out.format(leftAlignFormat, msg , from.getUsername());
+		System.out.format("+------------------------------------------+------------+%n");
 		
-		//return the local time the message was received
 		return System.currentTimeMillis();
 	}
 	

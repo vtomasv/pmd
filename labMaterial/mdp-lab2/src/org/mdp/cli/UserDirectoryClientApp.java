@@ -39,8 +39,8 @@ public class UserDirectoryClientApp {
 	//TODO replace with your details here
 	public static final String USER_NAME = "ahogan";
 	public static final String NAME = "Aidan Hogan";
-	public static final String IP = "10.0.114.59";
-	public static final int PORT = 1985;
+	public static final String IP = "localhost";
+	public static final int PORT = 4447;
 	
 	/**
 	 * An example to test central the directory.

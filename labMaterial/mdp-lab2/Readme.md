@@ -100,3 +100,165 @@ Una vez obtiene el objeto remoto ***InstantMessagingStub*** puede invocar el mé
 <p style="text-align:center;">
 <img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/interaccion.004.png"  >
 </p>
+
+codigo 
+
+## Como se ve en el codigo 
+
+Primero veamos como un simple cliente se debe conectar al directorio de usuarios 
+
+```java
+	/**
+	 * Connect to the central directory.
+	 * 
+	 * (See UserDirectoryClient for example)
+	 * @param port 
+	 * @param hostname 
+	 * 
+	 * 
+	 * @return A stub to call message method on
+	 * @throws RemoteException 
+	 * @throws NotBoundException 
+	 */
+	public static UserDirectoryStub connectToDirectory(String hostname, int port) throws RemoteException, NotBoundException {
+
+		// Lo primero que hacemos es conectarnos al Registro del servidor
+		// que contiene a todos los usuarios
+		Registry registry = LocateRegistry.getRegistry(UserDirectoryClientApp.DIR_HOSTNAME, UserDirectoryClientApp.DIR_PORT);
+		
+		// Lo siguiente es obtener el objeto remoto del directorio asi a ese objeto
+		// le podemos pedir quien esta conectado! 
+		UserDirectoryStub stub = (UserDirectoryStub) registry.lookup(UserDirectoryServer.class.getSimpleName());
+		
+		
+		return stub;
+	}
+```
+
+Despues de esto es posible pedirle a ***stub*** todo el directorio de usuarios. 
+
+Pero antes de eso lo que vamos a hacer es registrar en nuestro registro local el servidor de mensajeria para que otros usuarios nos puedan hablar. 
+
+```java 
+	/**
+	 * Create a skeleton for InstantMessagingServer and bind it to the registry
+	 * 
+	 * This is what other people will access to message you
+	 * 
+	 * @param r
+	 * @return
+	 * @throws RemoteException
+	 * @throws AlreadyBoundException
+	 */
+	public static Remote bindSkeleton(Registry r) throws RemoteException, AlreadyBoundException {
+		
+		// Ahora lo que hacemos es registrar nuestro servidor de mensajeria local
+		// en nuestro repositorio para que otro cliente que quiera hablar con nosotros
+		// use este objeto de forma remota. 
+		Remote skel = new InstantMessagingServer();
+		
+		InstantMessagingStub stub = (InstantMessagingStub) UnicastRemoteObject.exportObject(skel, 0);
+		
+		r.bind(InstantMessagingServer.DEFAULT_REG_NAME, stub);
+
+		return skel;
+	}
+
+``` 
+
+Por ultimo implementamos el método que nos permite enviarle a un usuario particular un mensaje. 
+
+
+```java
+	/**
+	 * Message user.
+	 * 
+	 * Connect to their registry, retrieve the InstantMessagingStub stub.
+	 * Call the message method on the stub.
+	 * 
+	 * @param username
+	 * @param msg
+	 * @return Time acknowledged by message server
+	 * @throws NotBoundException 
+	 * @throws RemoteException 
+	 * @throws AccessException 
+	 */
+	public static long messageUser(User to, User from, String msg) throws AccessException, RemoteException, NotBoundException{
+
+		// Lo primero que hacemos es conectarnos al repositorio del usuario que queremos 
+		// hablarle 
+		Registry registry = LocateRegistry.getRegistry(to.getHostname(), to.getPort());
+
+
+		// Una vez  nos conectamos traemos el objeto remoto que representa a su servidor 
+		// de mensajeria para poder invocarle metodos remotamente. 
+		InstantMessagingStub server = (InstantMessagingStub) registry.lookup(InstantMessagingServer.DEFAULT_REG_NAME);
+		
+		// Una vez que tenemos el objeto remoto podemos invocar 
+		// metodos sin problemas!! 
+		long dateInLong  = server.message(from, msg);
+		
+		return dateInLong;
+	}
+	
+```
+
+Esto se puede mejorar un poco, por ejemplo evitando ir a buscar todas las veces el ***InstantMessagingStub*** del mismo usuario dejándolo en un hash, eso quedaría algo así.
+
+
+```java
+
+...
+
+public class InstantMessagingApp {
+
+	
+	static private Map<String,InstantMessagingStub> directoryOfRepositorys = new ConcurrentHashMap<String,InstantMessagingStub>();
+
+...
+
+
+	/**
+	 * Message user.
+	 * 
+	 * Connect to their registry, retrieve the InstantMessagingStub stub.
+	 * Call the message method on the stub.
+	 * 
+	 * @param username
+	 * @param msg
+	 * @return Time acknowledged by message server
+	 * @throws NotBoundException 
+	 * @throws RemoteException 
+	 * @throws AccessException 
+	 */
+	public static long messageUser(User to, User from, String msg) throws AccessException, RemoteException, NotBoundException{
+
+		InstantMessagingStub server  = InstantMessagingApp.directoryOfRepositorys.get(to.getUsername());
+		
+		
+		if ( server == null )
+		{ 		
+			// Lo primero que hacemos es conectarnos al repositorio del usuario que queremos 
+			// hablarle 
+			Registry registry = LocateRegistry.getRegistry(to.getHostname(), to.getPort());
+
+			// Una vez  nos conectamos traemos el objeto remoto que representa a su servidor 
+			// de mensajeria para poder invocarle metodos remotamente. 
+			
+			server = (InstantMessagingStub) registry.lookup(InstantMessagingServer.DEFAULT_REG_NAME);
+
+			InstantMessagingApp.directoryOfRepositorys.put(to.getUsername(), server);
+		}
+		
+
+		// Una vez que tenemos el objeto remoto podemos invocar 
+		// metodos sin problemas!! 
+		long dateInLong  = server.message(from, msg);
+		
+		return dateInLong;
+	}
+	
+```
+
+
+Fin ;-)

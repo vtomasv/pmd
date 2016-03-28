@@ -238,7 +238,23 @@ Cuando termina podemos ver el estado de cada uno de los stages,.
 <img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/lab03_cloud_04.png"  width="60%" height="60%">
 </p> 
 
+Ahora vemos el archivo de salida en nuestro storage
 
 <p style="text-align:center;">
 <img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/lab03_cloud_05.png"  width="60%" height="60%">
 </p> 
+
+Este es el contenido 
+
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/lab03_cloud_06.png"  width="60%" height="60%">
+</p> 
+
+Y podemos ver el rendimiento de nuestras maquinas en el dashboard de Cloud 
+
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/lab03_cloud_07.png"  width="60%" height="60%">
+</p> 
+
+
+Saludos!

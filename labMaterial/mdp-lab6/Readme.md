@@ -11,7 +11,17 @@ La idea es ahorrar el máximo de tiempo en temas de administración y gestión d
 
 Ustedes pueden usar cualquier recetar de Docker que contenga **Pig** yo decidi utilizar [esta](https://github.com/ipedrazas/docker-hadoop-2.5.2-pig-0.14.0), es obvio que pueden descargar la que ustedes les plazca. 
 
-Primero debemos subir Kitematic, luego usamos la consola de Docker para el resto. 
+Primero debemos subir Kitematic.
+
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/kitematic_icon.png"  width="60%" height="60%">
+</p>
+
+luego usamos la consola de Docker para el resto (hacer click sobre Docker cli). 
+
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/consolaDocker.png"  width="60%" height="60%">
+</p>
 
 Una vez que estamos dentro de la consola de Docker corremos el siguiente comando 
 
@@ -42,6 +52,15 @@ Status: Downloaded newer image for ipedrazas/hadoop-pig:latest
 ```bash
 docker run -i -t ipedrazas/hadoop-pig /etc/bootstrap.sh -bash
 ```
+
+
+> Deberíamos ver la maquina corriendo en kitematic algo así.
+
+<p style="text-align:center;">
+<img  src="https://raw.githubusercontent.com/vtomasv/pmd/master/assets/pigMachine.png"  width="60%" height="60%">
+</p>
+
+
 
 Luego si queremos ver si esta corriendo **Pig** ejecutamos el siguiente comando 
 
@@ -105,15 +124,16 @@ Por alguna razón en este contenedor no viene encendido el **historyserver** per
 
 Ahora si podemos iniciar nuestro proceso **Pig** con 
 
-`` 
+``` 
 pig actor-count.pig
 ```
 
 Tendrás una salida de la siguiente forma: 
 
+
+
 ```
 .....
-
 HadoopVersion	PigVersion	UserId	StartedAt	FinishedAt	Features
 2.5.2	0.14.0	root	2016-04-18 15:47:53	2016-04-18 15:50:26	HASH_JOIN,GROUP_BY,ORDER_BY,FILTER
 
@@ -157,7 +177,6 @@ job_1460999380570_0009
 2016-04-18 15:50:27,489 [main] INFO  org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceLauncher - Success!
 2016-04-18 15:50:27,517 [main] INFO  org.apache.pig.Main - Pig script completed in 2 minutes, 38 seconds and 72 milliseconds (158072 ms)
 ... 
-
 ```
 Ahora podemos ver el contenido
 
@@ -207,3 +226,5 @@ bash-4.1# ./hdfs dfs -cat uhadoop/vtomasv/imdb-costars-100k_2/part-r-00000  | mo
 6	Aguilar, Luis (I)##Ahuet, Julio
 6	Aguilar, Antonio (I)##Aguilar, Pepe (I)
 ```
+
+Hasta pronto! 

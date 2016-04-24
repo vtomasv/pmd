@@ -1,42 +1,65 @@
 -- This script finds the top stars in IMDb (those with the most "good movies")!
 
 -- Note the last column now has gender
-raw_roles = LOAD 'hdfs://cm:9000/uhadoop/shared/imdb/imdb-stars-g-100k.tsv' USING PigStorage('\t') AS (star, title, year, num, type, episode, billing, char, gender);
+raw_roles = LOAD 'hdfs://172.17.0.2:9000/user/root/uhadoop/vtomasv/imdb-stars-g-100k.tsv' USING PigStorage('\t') AS (star, title, year, num, type, episode, billing, char, gender);
 -- Later you can change the above file to 'hdfs://cm:9000/uhadoop/shared/imdb/imdb-stars-g.tsv' to see the full output
 
 
-raw_ratings = LOAD 'hdfs://cm:9000/uhadoop/shared/imdb/imdb-ratings.tsv' USING PigStorage('\t') AS (dist, votes, score, title, year, num, type, episode);
+raw_ratings = LOAD 'hdfs://172.17.0.2:9000/user/root/uhadoop/vtomasv/imdb-ratings.tsv' USING PigStorage('\t') AS (dist, votes, score, title, year, num, type, episode);
 
 --------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------
 -- Now to implement the script
 
--- We want to compute the top actors / top actresses (separately).
--- Actors should be one output file, actresses in the other.
--- Gender is now given as 'MALE'/'FEMALE' in the gender column of raw_roles
+peliculas = FILTER raw_roles BY type == 'THEATRICAL_MOVIE';
+ratings = FILTER raw_ratings BY type == 'THEATRICAL_MOVIE';
 
--- To do so, we want to count how many good movies each starred in.
--- We count a movie as good if:
---   it has at least (>=) 1,000 votes (votes in raw_rating) 
---   it has a score >= 8.0 (score in raw_rating)
+peliculasBuenas = FILTER ratings BY ((votes >= 1000) AND ( score >= 8.0));
 
--- The best actors/actresses are those with the most good movies.
+todasLasPelisConActores = FOREACH peliculas       GENERATE CONCAT(title, '##' , year , '##', num) AS movie, star, gender ;
 
--- An actor/actress may play multiple roles in a movie;
---  we wish to count each such movie only once.
+todasLasPelisBuenas =     FOREACH peliculasBuenas GENERATE CONCAT(title, '##' , year , '##', num) AS movie, votes, score ;
 
--- If an actor/actress does not star in a good movie
---  a count of zero should be returned (i.e., the actor/actress
---   should still appear in the output).
+pelisFiltradasConUnActorPorPeli = DISTINCT todasLasPelisConActores;
 
--- The results should be sorted descending by count.
+PelisConRanking = JOIN pelisFiltradasConUnActorPorPeli by movie LEFT OUTER, todasLasPelisBuenas by movie;
 
--- We only want to count entries of type THEATRICAL_MOVIE (not tv series, etc.).
--- Again, note that only CONCAT(title,'##',year,'##',num) acts as a key for movies.
 
--- Test on smaller file first (as given above),
---  then test on larger file to get the results.
+pelisFormateados  = FOREACH PelisConRanking GENERATE $0 AS movie, $1 AS star, $2 AS gender, (($3 IS NULL) ? '0' : $3) AS movie_2, (($4 IS NULL) ? '0' : $4) AS votes, (($5 IS NULL) ? '0' : $5) AS score ;
+
+actoresPeliculasMalas = FILTER pelisFormateados BY movie_2 == '0';
+
+actoresPeliculasBuenas = FILTER pelisFormateados BY movie_2 != '0';
+
+hombres = FILTER actoresPeliculasBuenas BY gender == 'MALE';
+hombresAgrupado = GROUP hombres by (star);
+
+mujeres = FILTER actoresPeliculasBuenas BY gender == 'FEMALE';
+mujeresAgrupado = GROUP mujeres by (star);
+
+mejoresActores  = FOREACH hombresAgrupado GENERATE flatten(group) , COUNT ( hombres.movie ) AS count;
+mejoresActrices = FOREACH mujeresAgrupado GENERATE flatten(group) , COUNT ( mujeres.movie ) AS count;
+
+
+hombresMalos = FILTER actoresPeliculasMalas BY gender == 'MALE';
+hombresAgrupadoMalos = GROUP hombresMalos by (star);
+
+mujeresMalos = FILTER actoresPeliculasMalas BY gender == 'FEMALE';
+mujeresAgrupadoMalos = GROUP mujeresMalos by (star);
+
+malosActores  = FOREACH hombresAgrupadoMalos GENERATE flatten(group) , 0 AS count;
+malasActrices = FOREACH mujeresAgrupadoMalos GENERATE flatten(group) , 0 AS count;
+
+todosHombres = UNION mejoresActores, malosActores;
+todasMujeres = UNION mejoresActrices, malasActrices;
+
+hombresOrdenados  =   ORDER todosHombres BY count  DESC;
+mujeresOrdenados  =   ORDER todasMujeres  BY count  DESC;
+
+
+STORE hombresOrdenados INTO '/uhadoop/vtomasv/h_10/';
+
+STORE mujeresOrdenados INTO '/uhadoop/vtomasv/m_10/';
 
 --------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------
-
